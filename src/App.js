@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { Box } from '@mui/material';
 
 const inicialItems = [
   {id:"1", content:"Conteúdo 1"},
@@ -80,40 +81,40 @@ function App() {
   };
 
   return (
-    <div style={{display:"flex", justifyContent:"center"}}>
+    <Box style={{display:"flex", justifyContent:"center"}}>
       <DragDropContext onDragEnd={onDragEnd}>
         {columns.map((column) => (
-          <div style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
+          <Box style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
             <h1>{column.name}</h1>
             <Droppable droppableId={column.id} key={column.id}>
               {(provided) => (
-                <div 
+                <Box 
                   ref={provided.innerRef}
                   style={{backgroundColor:"lightblue", width:250, height: 500, padding: 10, margin: 10}}
                 >  
                           {column.items.map((item, index)=>(
                             <Draggable draggableId={item.id} index={index} key={item.id}>
                               {(provided) => (
-                                <div 
+                                <Box 
                                   {...provided.dragHandleProps}
                                   {...provided.draggableProps}
                                   ref={provided.innerRef} 
                                   style={{backgroundColor:"gray", height: 40, marginBottom: 1,...provided.draggableProps.style}}
                                   >
                                     {item.content}
-                                </div>
+                                </Box>
                               )}
                             </Draggable>  
                           ))}
                           {provided.placeholder}                   
 
-                  </div>
+                  </Box>
               )}
             </Droppable> 
-          </div>
+          </Box>
         ))}
       </DragDropContext>
-    </div>
+    </Box>
   );
 }
 
