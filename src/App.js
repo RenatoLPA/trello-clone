@@ -1,119 +1,128 @@
 import React, { useState } from 'react';
-import logo from './logo.svg';
-import './App.css';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Box } from '@mui/material';
+import { Box, Paper, Typography, AppBar, Toolbar, Button, IconButton } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 
 const inicialItems = [
-  {id:"1", content:"Conteúdo 1"},
-  {id:"2", content:"Conteúdo 2"},
-  {id:"3", content:"Conteúdo 3"},
-]
+  { id: "1", content: "Conteúdo 1" },
+  { id: "2", content: "Conteúdo 2" },
+  { id: "3", content: "Conteúdo 3" },
+];
 
 const inicialColumns = [
-  {
-    name: "Atribuidos",
-    id: "123",
-    items: inicialItems,
-  },
-  {
-    name: "Testes",
-    id: "456",
-    items: [],
-  },
-  {
-    name: "Aprovados",
-    id: "789",
-    items: [],
-  },
-]
+  { name: "Atribuidos", id: "123", items: inicialItems },
+  { name: "Testes", id: "456", items: [] },
+  { name: "Aprovados", id: "789", items: [] },
+];
+
+function Navbar() {
+  return (
+    <Box sx={{ flexGrow: 1, marginBottom: "10px" }}>
+      <AppBar position="static" sx={{ backgroundColor: '#ffffff31' }}>
+        <Toolbar>
+          <Box display="flex" justifyContent="center" sx={{ width: '100%' }}>
+            <Box 
+              component="img" 
+              src='/assets/img/logoBisa.jpg' 
+              sx={{ width: '120px' }} 
+            />
+          </Box>
+        </Toolbar>
+      </AppBar>
+    </Box>
+  );
+}
 
 function App() {
-
   const [columns, setColumns] = useState(inicialColumns);
 
   const onDragEnd = (result) => {
-    console.log(result);
-    //var sourceColumItems = columns[0].items;
-    var sourceColumItems = [];
-    var destinationColumnsItems = [];
-    var draggedItem = {};
-
-    var sourceColumnId = 0;
-    var destinationColumnId = 0;
-
-    for (var i in columns) {
-      if(columns[i].id == result.source.droppableId) {
-        sourceColumItems = columns[i].items
-        sourceColumnId = i
-      } else if (columns[i].id == result.destination.droppableId) {
-        destinationColumnsItems = columns[i].items
-        destinationColumnId = i
-      }
+    const { source, destination } = result;
+  
+    // Se o usuário soltar fora de qualquer coluna, não faz nada
+    if (!destination) return;
+  
+    // Se soltar no mesmo lugar (mesma coluna e mesma posição), não faz nada
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
     }
-
-    for(var i in sourceColumItems) {
-      if(sourceColumItems[i].id == result.draggableId) {
-        draggedItem = sourceColumItems[i];
-      }
-    }
-
-    //Excluir o objeto arrastado
-    var filteredSourceColumnItems = sourceColumItems.filter( 
-      (item) => item.id != result.draggableId);
-
-    //Adicionar o mesmo na nova posição
-    if(result.source.droppableId == result.destination.droppableId) {
-      filteredSourceColumnItems.splice(result.destination.index, 0, draggedItem);
-
-      //Mudar o state
-      var columnsCopy = JSON.parse(JSON.stringify(columns));
-      columnsCopy[sourceColumnId].items = filteredSourceColumnItems;
-      setColumns(columnsCopy);
+  
+    const newColumns = [...columns];
+    
+    // Encontra as colunas de origem e destino
+    const sourceCol = newColumns.find(col => col.id === source.droppableId);
+    const destCol = newColumns.find(col => col.id === destination.droppableId);
+  
+    // Remove o item da coluna de origem
+    const sourceItems = [...sourceCol.items];
+    const [draggedItem] = sourceItems.splice(source.index, 1);
+    sourceCol.items = sourceItems;
+  
+    if (source.droppableId === destination.droppableId) {
+      // Se for na mesma coluna, apenas insere na nova posição
+      sourceItems.splice(destination.index, 0, draggedItem);
     } else {
-      destinationColumnsItems.splice(result.destination.index, 0, draggedItem);
-      //Mudar o state
-      var columnsCopy = JSON.parse(JSON.stringify(columns));
-      columnsCopy[sourceColumnId].items = filteredSourceColumnItems;
-      columnsCopy[destinationColumnId].items = destinationColumnsItems;
-      setColumns(columnsCopy);
+      // Se for coluna diferente, insere na coluna de destino
+      const destItems = [...destCol.items];
+      destItems.splice(destination.index, 0, draggedItem);
+      destCol.items = destItems;
     }
+  
+    setColumns(newColumns);
   };
 
   return (
-    <Box style={{display:"flex", justifyContent:"center"}}>
-      <DragDropContext onDragEnd={onDragEnd}>
-        {columns.map((column) => (
-          <Box style={{display:"flex", flexDirection:"column", alignItems:"center"}}>
-            <h1>{column.name}</h1>
-            <Droppable droppableId={column.id} key={column.id}>
-              {(provided) => (
-                <Box 
-                  ref={provided.innerRef}
-                  style={{backgroundColor:"lightblue", width:250, height: 500, padding: 10, margin: 10}}
-                >  
-                          {column.items.map((item, index)=>(
-                            <Draggable draggableId={item.id} index={index} key={item.id}>
-                              {(provided) => (
-                                <Box 
-                                  {...provided.dragHandleProps}
-                                  {...provided.draggableProps}
-                                  ref={provided.innerRef} 
-                                  style={{backgroundColor:"gray", height: 40, marginBottom: 1,...provided.draggableProps.style}}
-                                  >
-                                    {item.content}
-                                </Box>
-                              )}
-                            </Draggable>  
-                          ))}
-                          {provided.placeholder}                   
+    <Box sx={{ minHeight: '100vh', backgroundImage: "linear-gradient(45deg, #8587f3 30%, #fd84ae 100%)" }}>
+      {/* 2. Chamamos a Navbar aqui dentro! */}
+      <Navbar />
 
+      <Box display="flex" justifyContent="center" sx={{ pt: 5 }}>
+        <DragDropContext onDragEnd={onDragEnd}>
+          {columns.map((column) => (
+            <Box key={column.id} sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <Droppable droppableId={column.id}>
+                {(provided) => (
+                  <Box
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    sx={{ backgroundColor: "#ebebf1", width: 250, minHeight: 500, p: 2, m: 2, borderRadius: 2 }}
+                  >
+                    <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold', color: '#333' }}>
+                      {column.name}
+                    </Typography>
+                    <Box ref={provided.innerRef} width="100%" height="100%">
+                    {column.items.map((item, index) => (
+                      <Draggable draggableId={item.id} index={index} key={item.id}>
+                        {(provided) => (
+                          <Paper
+                            elevation={2}
+                            ref={provided.innerRef}
+                            {...provided.dragHandleProps}
+                            {...provided.draggableProps}
+                            sx={{
+                              p: 1.5,
+                              mb: 1.5,
+                              backgroundColor: "white",
+                              ...provided.draggableProps.style
+                            }}
+                          >
+                            {item.content}
+                          </Paper>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                    </Box>
                   </Box>
-              )}
-            </Droppable> 
-          </Box>
-        ))}
-      </DragDropContext>
+                )}
+              </Droppable>
+            </Box>
+          ))}
+        </DragDropContext>
+      </Box>
     </Box>
   );
 }
