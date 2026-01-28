@@ -1,112 +1,131 @@
 import React, { useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { Box, Paper, Typography, AppBar, Toolbar, Button, IconButton } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import { Box, Button, Paper, Typography, AppBar, Toolbar } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import Navbar from "./components/Navbar/index.jsx";
 
-const inicialItems = [
-  { id: "1", content: "Conteúdo 1" },
-  { id: "2", content: "Conteúdo 2" },
-  { id: "3", content: "Conteúdo 3" },
+const novosItems = [
+  { id: "111", content: "[97] Avanços no Agent de IA da BisaWeb - Parte 3" },
+  { id: "222", content: "[91] Melhorias na Rotina de importação para o Filiadosweb" },
+  { id: "333", content: "[.UX] [Eleições] Bisavoto: Ajustar o layout das páginas de retorno" },
 ];
+
+const atribuidosItems = [
+  { id: "at1", content: "[UX] Criar Trello da Bisa"},
+  { id: "at2", content: "[99] Melhorar configurações de instalação do n8n"}
+]
+
+const testeItems = [
+  {id: "t1", content: "[91] [Eleições] Melhorias na importação de eleitores"},
+  {id: "t2", content: "[99] Boletos não são gerado para Aposentados e Pensionistas"}
+]
+
+const retornoItems = [
+  {id: "r1", content: "[UX] Ajustar a Formatação da caixa de mensagem do Bisavoto"},
+  {id: "r2", content: "[99] Verificar se precisar mudar algo no disparo dos e-mails BISAVOTO e demais"},
+  {id: "r3", content: "[99] Acrescentar os campos CÓDIGO DO SINDICATO E VALIDADE DA CARTEIRA na configuração da carteira DE DEPENDENTES"}
+]
+
+const impedimentoItems = [
+  {id: "i1", content: "[UnP] ﻿Mudar o lugar destino do backup diário dos sistemas para servidor de TESTES"},
+  {id: "i2", content: "[93] [Eleições] Implementar reenvio de senha/token pelo WhatsApp - BISAVOTO"}
+]
+
+const aprovadosItems = [
+  {id: "ap1", content: "[99] [ERRO] no Relatório de Filiação e Recadastramento Online"}
+]
 
 const inicialColumns = [
-  { name: "Atribuidos", id: "123", items: inicialItems },
-  { name: "Testes", id: "456", items: [] },
-  { name: "Aprovados", id: "789", items: [] },
+  { name: "Novos", id: "123", items: novosItems},
+  { name: "Atribuidos", id: "456", items: atribuidosItems},
+  { name: "Retornos", id: "789", items: retornoItems},
+  { name: "Impedimentos", id: "1011", items: impedimentoItems},
+  { name: "Testes", id: "1213", items: testeItems},
+  { name: "Aprovados", id: "1415", items: aprovadosItems}
 ];
-
-function Navbar() {
-  return (
-    <Box sx={{ flexGrow: 1, marginBottom: "10px" }}>
-      <AppBar position="static" sx={{ backgroundColor: '#ffffff31' }}>
-        <Toolbar>
-          <Box display="flex" justifyContent="center" sx={{ width: '100%' }}>
-            <Box 
-              component="img" 
-              src='/assets/img/logoBisa.jpg' 
-              sx={{ width: '120px' }} 
-            />
-          </Box>
-        </Toolbar>
-      </AppBar>
-    </Box>
-  );
-}
 
 function App() {
   const [columns, setColumns] = useState(inicialColumns);
 
+  // Use esta versão simplificada e segura do onDragEnd para evitar erros de leitura
   const onDragEnd = (result) => {
     const { source, destination } = result;
-  
-    // Se o usuário soltar fora de qualquer coluna, não faz nada
     if (!destination) return;
-  
-    // Se soltar no mesmo lugar (mesma coluna e mesma posição), não faz nada
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    ) {
-      return;
-    }
-  
+
     const newColumns = [...columns];
-    
-    // Encontra as colunas de origem e destino
-    const sourceCol = newColumns.find(col => col.id === source.droppableId);
-    const destCol = newColumns.find(col => col.id === destination.droppableId);
-  
-    // Remove o item da coluna de origem
+    const sourceCol = newColumns.find(c => c.id === source.droppableId);
+    const destCol = newColumns.find(c => c.id === destination.droppableId);
+
     const sourceItems = [...sourceCol.items];
     const [draggedItem] = sourceItems.splice(source.index, 1);
-    sourceCol.items = sourceItems;
-  
+
     if (source.droppableId === destination.droppableId) {
-      // Se for na mesma coluna, apenas insere na nova posição
       sourceItems.splice(destination.index, 0, draggedItem);
+      sourceCol.items = sourceItems;
     } else {
-      // Se for coluna diferente, insere na coluna de destino
       const destItems = [...destCol.items];
       destItems.splice(destination.index, 0, draggedItem);
+      sourceCol.items = sourceItems;
       destCol.items = destItems;
     }
-  
     setColumns(newColumns);
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundImage: "linear-gradient(45deg, #8587f3 30%, #fd84ae 100%)" }}>
-      {/* 2. Chamamos a Navbar aqui dentro! */}
+    <Box sx={{ 
+      backgroundImage: "linear-gradient(45deg, #8587f3 30%, #fd84ae 100%)",
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column"
+    }}>
       <Navbar />
-
-      <Box display="flex" justifyContent="center" sx={{ pt: 5 }}>
+    
+      <Box sx={{ 
+        display: "flex", 
+        justifyContent: "flex-start",
+        alignItems: "flex-start",
+        flexGrow: 8,
+        p: 5,
+        overflowX: "auto",
+        gap: 5
+      }}>
         <DragDropContext onDragEnd={onDragEnd}>
           {columns.map((column) => (
-            <Box key={column.id} sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <Box key={column.id} sx={{ display: "flex", flexDirection: "column", minWidth: 320 }}>
+              
               <Droppable droppableId={column.id}>
-                {(provided) => (
+                {(provided, snapshot) => (
                   <Box
-                    ref={provided.innerRef}
                     {...provided.droppableProps}
-                    sx={{ backgroundColor: "#ebebf1", width: 250, minHeight: 500, p: 2, m: 2, borderRadius: 2 }}
+                    ref={provided.innerRef}
+                    sx={{ 
+                      backgroundColor: snapshot.isDraggingOver ? "#d1d1e0" : "#ebebf1", 
+                      width: "100%",
+                      minHeight: 200, 
+                      p: 2, 
+                      borderRadius: 2,
+                      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)"
+                    }}
                   >
-                    <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold', color: '#333' }}>
+                    <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold' }}>
                       {column.name}
                     </Typography>
-                    <Box ref={provided.innerRef} width="100%" height="100%">
+
                     {column.items.map((item, index) => (
                       <Draggable draggableId={item.id} index={index} key={item.id}>
                         {(provided) => (
                           <Paper
-                            elevation={2}
                             ref={provided.innerRef}
                             {...provided.dragHandleProps}
                             {...provided.draggableProps}
                             sx={{
-                              p: 1.5,
-                              mb: 1.5,
+                              p: 2,
+                              mb: 2,
                               backgroundColor: "white",
-                              ...provided.draggableProps.style
+                              minHeight: 50,
+                              display: "flex",
+                              alignItems: "center",
+                              ...provided.draggableProps.style // Crucial para a animação
                             }}
                           >
                             {item.content}
@@ -115,7 +134,14 @@ function App() {
                       </Draggable>
                     ))}
                     {provided.placeholder}
-                    </Box>
+                    
+                    <Button 
+                      sx={{ mt: 1, color: "#959dab", justifyContent: "flex-start" }} 
+                      fullWidth
+                      startIcon={<AddIcon />}
+                    >
+                      CARD
+                    </Button>
                   </Box>
                 )}
               </Droppable>
